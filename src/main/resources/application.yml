@@ -34,7 +34,7 @@ spring:
       write-dates-as-timestamps: false
 
 jwt:
-  secret: Ym9va2luZy1zeXN0ZW0tc2VjcmV0LWtleS1mb3Itand0LXRva2VuLWdlbmVyYXRpb24tMjAyNA==
+  secret: ${JWT_SECRET:Ym9va2luZy1zeXN0ZW0tc2VjcmV0LWtleS1mb3Itand0LXRva2VuLWdlbmVyYXRpb24tMjAyNA==}
   expiration-ms: 86400000
   token-prefix: "Bearer "
   header: Authorization

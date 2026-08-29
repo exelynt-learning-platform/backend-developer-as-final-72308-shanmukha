@@ -80,13 +80,21 @@ spring:
 
 ### 4. JWT Configuration
 
-In `application.yml`:
+Set the JWT secret via environment variable (required, must be ≥32 bytes base64-encoded):
+
+```bash
+export JWT_SECRET=your-base64-encoded-secret-key-here
+```
+
+Or configure in `application-local.yml`:
 
 ```yaml
 jwt:
-  secret: Ym9va2luZy1zeXN0ZW0tc2VjcmV0LWtleS1mb3Itand0LXRva2VuLWdlbmVyYXRpb24tMjAyNA==
+  secret: ${JWT_SECRET}
   expiration-ms: 86400000
 ```
+
+> **Security Note:** Never commit real secrets to the repository. Use environment variables or a secrets manager in production.
 
 ### 5. Run the Application
 
@@ -154,6 +162,8 @@ OpenAPI JSON: http://localhost:8080/api/api-docs
 | sort | String | Sort field and direction (default: createdAt,desc) |
 
 ## Seed User Credentials
+
+> **Warning:** These are development-only credentials. In production, disable data seeding and enforce strong password policies.
 
 ### ADMIN
 

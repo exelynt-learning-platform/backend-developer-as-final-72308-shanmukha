@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -30,36 +31,29 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        Role userRole = seedRoles();
-        seedUsers(userRole);
+        Role[] roles = seedRoles();
+        seedUsers(roles[0], roles[1]);
         seedResources();
     }
 
-    private Role seedRoles() {
-        Role userRole;
-        if (!roleRepository.existsByName(RoleName.ROLE_USER)) {
-            userRole = roleRepository.save(Role.builder()
-                    .name(RoleName.ROLE_USER)
-                    .description("Standard user role")
-                    .build());
-            log.info("Created ROLE_USER");
-        } else {
-            userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow();
-        }
-
-        if (!roleRepository.existsByName(RoleName.ROLE_ADMIN)) {
-            roleRepository.save(Role.builder()
-                    .name(RoleName.ROLE_ADMIN)
-                    .description("Administrator role")
-                    .build());
-            log.info("Created ROLE_ADMIN");
-        }
-
-        return userRole;
+    private Role[] seedRoles() {
+        Role userRole = seedRole(RoleName.ROLE_USER, "Standard user role");
+        Role adminRole = seedRole(RoleName.ROLE_ADMIN, "Administrator role");
+        return new Role[]{userRole, adminRole};
     }
 
-    private void seedUsers(Role userRole) {
-        Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).orElseThrow();
+    private Role seedRole(RoleName roleName, String description) {
+        return roleRepository.findByName(roleName).orElseGet(() -> {
+            Role role = roleRepository.save(Role.builder()
+                    .name(roleName)
+                    .description(description)
+                    .build());
+            log.info("Created {}", roleName);
+            return role;
+        });
+    }
+
+    private void seedUsers(Role userRole, Role adminRole) {
 
         if (!userRepository.existsByUsername("user")) {
             Set<Role> userRoles = new HashSet<>();
