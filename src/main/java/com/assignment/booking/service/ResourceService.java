@@ -4,8 +4,10 @@ import com.assignment.booking.dto.request.ResourceRequest;
 import com.assignment.booking.dto.response.PageResponse;
 import com.assignment.booking.dto.response.ResourceResponse;
 import com.assignment.booking.entity.Resource;
+import com.assignment.booking.exception.BadRequestException;
 import com.assignment.booking.exception.ResourceNotFoundException;
 import com.assignment.booking.mapper.EntityMapper;
+import com.assignment.booking.repository.ReservationRepository;
 import com.assignment.booking.repository.ResourceRepository;
 import com.assignment.booking.specification.ResourceSpecification;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ResourceService {
 
     private final ResourceRepository resourceRepository;
+    private final ReservationRepository reservationRepository;
     private final EntityMapper entityMapper;
 
     @Transactional(readOnly = true)
@@ -87,6 +90,9 @@ public class ResourceService {
     public void deleteResource(Long id) {
         if (!resourceRepository.existsById(id)) {
             throw new ResourceNotFoundException("Resource", id);
+        }
+        if (reservationRepository.existsByResourceId(id)) {
+            throw new BadRequestException("Cannot delete resource with existing reservations. Cancel or reassign reservations first.");
         }
         resourceRepository.deleteById(id);
     }

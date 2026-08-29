@@ -165,15 +165,17 @@ OpenAPI JSON: http://localhost:8080/api/api-docs
 
 > **Warning:** These are development-only credentials. In production, disable data seeding and enforce strong password policies.
 
+Seed users are created automatically when running with the `dev` profile (`spring.profiles.active=dev`). Credentials are set in `DataSeeder.java` and should be changed before any non-local deployment.
+
 ### ADMIN
 
 - **Username:** `admin`
-- **Password:** `Admin@123`
+- **Password:** Set via `DataSeeder.java` — do not use default in production
 
 ### USER
 
 - **Username:** `user`
-- **Password:** `User@123`
+- **Password:** Set via `DataSeeder.java` — do not use default in production
 
 ## Running the Tests
 
@@ -195,7 +197,7 @@ mvn test -Dtest=AuthControllerIntegrationTest
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "Admin@123"}'
+  -d '{"username": "admin", "password": "<your-admin-password>"}'
 ```
 
 ### 2. Create a Resource (Admin)

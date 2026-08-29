@@ -6,6 +6,7 @@ import com.assignment.booking.dto.response.ResourceResponse;
 import com.assignment.booking.entity.Resource;
 import com.assignment.booking.exception.ResourceNotFoundException;
 import com.assignment.booking.mapper.EntityMapper;
+import com.assignment.booking.repository.ReservationRepository;
 import com.assignment.booking.repository.ResourceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class ResourceServiceTest {
 
     @Mock
     private ResourceRepository resourceRepository;
+
+    @Mock
+    private ReservationRepository reservationRepository;
 
     @Mock
     private EntityMapper entityMapper;
@@ -206,10 +210,22 @@ class ResourceServiceTest {
     @Test
     void deleteResource_Success() {
         when(resourceRepository.existsById(1L)).thenReturn(true);
+        when(reservationRepository.existsByResourceId(1L)).thenReturn(false);
 
         resourceService.deleteResource(1L);
 
         verify(resourceRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteResource_WithActiveReservations_ThrowsException() {
+        when(resourceRepository.existsById(1L)).thenReturn(true);
+        when(reservationRepository.existsByResourceId(1L)).thenReturn(true);
+
+        assertThrows(com.assignment.booking.exception.BadRequestException.class,
+                () -> resourceService.deleteResource(1L));
+
+        verify(resourceRepository, never()).deleteById(anyLong());
     }
 
     @Test

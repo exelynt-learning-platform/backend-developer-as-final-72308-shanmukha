@@ -32,4 +32,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     boolean existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
             Long resourceId, Long id, ReservationStatus status,
             java.time.LocalDateTime endTime, java.time.LocalDateTime startTime);
+
+    boolean existsByResourceId(Long resourceId);
 }
