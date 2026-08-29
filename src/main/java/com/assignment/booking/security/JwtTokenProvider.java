@@ -28,8 +28,10 @@ public class JwtTokenProvider {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         if (keyBytes.length < MIN_SECRET_KEY_BYTES) {
             throw new IllegalStateException(
-                    "JWT secret must be at least " + MIN_SECRET_KEY_BYTES
-                            + " bytes (256 bits). Current length: " + keyBytes.length + " bytes.");
+                    "JWT secret must be a Base64-encoded string of at least "
+                            + MIN_SECRET_KEY_BYTES + " bytes (256 bits) after decoding. "
+                            + "Current decoded length: " + keyBytes.length + " bytes. "
+                            + "Generate one with: openssl rand -base64 32");
         }
     }
 

@@ -134,6 +134,14 @@ public class ReservationService {
             throw new BadRequestException("Resource is not available for booking");
         }
 
+        if (request.getStartTime().isBefore(java.time.LocalDateTime.now())) {
+            throw new BadRequestException("Start time must be in the future");
+        }
+
+        if (request.getEndTime().isBefore(java.time.LocalDateTime.now())) {
+            throw new BadRequestException("End time must be in the future");
+        }
+
         if (request.getStartTime().isAfter(request.getEndTime()) ||
                 request.getStartTime().isEqual(request.getEndTime())) {
             throw new BadRequestException("Start time must be before end time");
