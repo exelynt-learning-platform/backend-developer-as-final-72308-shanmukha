@@ -13,10 +13,12 @@ import com.assignment.booking.mapper.EntityMapper;
 import com.assignment.booking.repository.RoleRepository;
 import com.assignment.booking.repository.UserRepository;
 import com.assignment.booking.security.JwtTokenProvider;
+import com.assignment.booking.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,16 +49,15 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
 
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new BadRequestException("User not found"));
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
         return LoginResponse.builder()
                 .token(token)
                 .type("Bearer")
-                .id(user.getId())
-                .username(user.getUsername())
-                .roles(user.getRoles().stream()
-                        .map(role -> role.getName().name())
+                .id(principal.getId())
+                .username(principal.getUsername())
+                .roles(principal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
                         .toList())
                 .expiresAt(LocalDateTime.ofInstant(
                         tokenProvider.getExpirationDateFromToken(token).toInstant(),

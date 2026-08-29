@@ -80,10 +80,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
-    @ExceptionHandler({DisabledException.class, LockedException.class})
+    @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ErrorResponse> handleDisabled(
-            Exception ex, HttpServletRequest request) {
-        ErrorResponse error = buildError(HttpStatus.UNAUTHORIZED, "Unauthorized", "Account is disabled or locked", request.getRequestURI());
+            DisabledException ex, HttpServletRequest request) {
+        ErrorResponse error = buildError(HttpStatus.UNAUTHORIZED, "Unauthorized", "Account is disabled", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponse> handleLocked(
+            LockedException ex, HttpServletRequest request) {
+        ErrorResponse error = buildError(HttpStatus.UNAUTHORIZED, "Unauthorized", "Account is locked", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 

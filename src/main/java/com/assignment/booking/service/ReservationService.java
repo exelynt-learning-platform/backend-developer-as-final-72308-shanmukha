@@ -100,13 +100,11 @@ public class ReservationService {
 
         ensureOwnershipOrAdmin(reservation);
 
-        Resource resource = resourceRepository.findById(request.getResourceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Resource", request.getResourceId()));
+        Resource resource = reservation.getResource();
 
         validateBookingRequest(resource, request);
         checkConflict(resource.getId(), id, request);
 
-        reservation.setResource(resource);
         reservation.setStartTime(request.getStartTime());
         reservation.setEndTime(request.getEndTime());
         reservation.setPrice(request.getPrice());
@@ -149,6 +147,13 @@ public class ReservationService {
 
         if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Price must be greater than 0");
+        }
+
+        long hours = java.time.Duration.between(request.getStartTime(), request.getEndTime()).toHours();
+        BigDecimal minimumPrice = resource.getPricePerUnit().multiply(BigDecimal.valueOf(Math.max(hours, 1)));
+        if (request.getPrice().compareTo(minimumPrice) < 0) {
+            throw new BadRequestException("Price must be at least " + minimumPrice
+                    + " (" + resource.getPricePerUnit() + "/unit x " + Math.max(hours, 1) + " units)");
         }
     }
 

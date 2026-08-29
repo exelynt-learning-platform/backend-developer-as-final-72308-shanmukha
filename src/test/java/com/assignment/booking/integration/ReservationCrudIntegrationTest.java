@@ -218,11 +218,17 @@ class ReservationCrudIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)));
 
+        ReservationRequest otherRequest = ReservationRequest.builder()
+                .resourceId(resourceId)
+                .startTime(LocalDateTime.now().plusDays(4))
+                .endTime(LocalDateTime.now().plusDays(4).plusHours(2))
+                .price(BigDecimal.valueOf(120))
+                .build();
+
         mockMvc.perform(post("/api/reservations")
                         .header("Authorization", bearer(otherUserToken))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                createReservationRequest(resourceId, BigDecimal.valueOf(80)))));
+                        .content(objectMapper.writeValueAsString(otherRequest)));
 
         mockMvc.perform(get("/api/reservations")
                         .header("Authorization", bearer(userToken)))
@@ -242,7 +248,7 @@ class ReservationCrudIntegrationTest {
                 .resourceId(resourceId)
                 .startTime(LocalDateTime.now().plusDays(3))
                 .endTime(LocalDateTime.now().plusDays(3).plusHours(2))
-                .price(BigDecimal.valueOf(80))
+                .price(BigDecimal.valueOf(120))
                 .build();
 
         mockMvc.perform(post("/api/reservations")

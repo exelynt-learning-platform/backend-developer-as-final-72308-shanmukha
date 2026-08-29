@@ -159,7 +159,7 @@ OpenAPI JSON: http://localhost:8080/api/api-docs
 | maxPrice | BigDecimal | Maximum price filter |
 | page | int | Page number (default: 0) |
 | size | int | Page size (default: 10) |
-| sort | String | Sort field and direction (default: createdAt,desc) |
+| sort | String | Sort field and direction (default: createdAt,desc). Use `\|` to separate multiple sort fields, e.g. `sort=price,asc\|createdAt,desc` |
 
 ### 5. Seed Data Configuration (dev profile only)
 

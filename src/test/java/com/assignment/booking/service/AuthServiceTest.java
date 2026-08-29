@@ -12,6 +12,7 @@ import com.assignment.booking.mapper.EntityMapper;
 import com.assignment.booking.repository.RoleRepository;
 import com.assignment.booking.repository.UserRepository;
 import com.assignment.booking.security.JwtTokenProvider;
+import com.assignment.booking.security.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -88,20 +92,26 @@ class AuthServiceTest {
     void login_Success() {
         LoginRequest request = new LoginRequest("testuser", "password123");
 
+        UserPrincipal principal = new UserPrincipal(
+                1L, "testuser", "encodedPassword", true,
+                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn("testuser");
+        when(auth.getPrincipal()).thenReturn(principal);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
         when(tokenProvider.generateToken(auth)).thenReturn("jwt-token");
         when(tokenProvider.getExpirationDateFromToken("jwt-token")).thenReturn(new Date(System.currentTimeMillis() + 86400000));
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         LoginResponse response = authService.login(request);
 
         assertNotNull(response);
         assertEquals("jwt-token", response.getToken());
         assertEquals("testuser", response.getUsername());
+        assertEquals(1L, response.getId());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository, never()).findByUsername(anyString());
     }
 
     @Test

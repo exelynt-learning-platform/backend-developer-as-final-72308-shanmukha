@@ -15,7 +15,6 @@ import com.assignment.booking.mapper.EntityMapper;
 import com.assignment.booking.repository.ReservationRepository;
 import com.assignment.booking.repository.ResourceRepository;
 import com.assignment.booking.repository.UserRepository;
-import com.assignment.booking.security.CustomUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
