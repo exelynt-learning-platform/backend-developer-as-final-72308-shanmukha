@@ -6,13 +6,12 @@ import com.assignment.booking.dto.response.PageResponse;
 import com.assignment.booking.dto.response.ReservationResponse;
 import com.assignment.booking.enums.ReservationStatus;
 import com.assignment.booking.service.ReservationService;
+import com.assignment.booking.util.SortUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,11 +36,10 @@ public class ReservationController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
 
-        Sort sortObj = Sort.by(Sort.Direction.fromString(sort[1]), sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortObj);
+        Pageable pageable = SortUtil.parsePageable(sort, page, size, "createdAt", "desc");
 
         PageResponse<ReservationResponse> reservations =
-                reservationService.getReservations(status, minPrice, maxPrice, sort[0], pageable);
+                reservationService.getReservations(status, minPrice, maxPrice, pageable);
         return ResponseEntity.ok(ApiResponse.success("Reservations retrieved successfully", reservations));
     }
 

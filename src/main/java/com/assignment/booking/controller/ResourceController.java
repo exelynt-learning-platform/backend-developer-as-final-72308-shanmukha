@@ -5,13 +5,12 @@ import com.assignment.booking.dto.response.ApiResponse;
 import com.assignment.booking.dto.response.PageResponse;
 import com.assignment.booking.dto.response.ResourceResponse;
 import com.assignment.booking.service.ResourceService;
+import com.assignment.booking.util.SortUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +32,7 @@ public class ResourceController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,asc") String[] sort) {
 
-        Sort sortObj = Sort.by(Sort.Direction.fromString(sort[1]), sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortObj);
+        Pageable pageable = SortUtil.parsePageable(sort, page, size, "id", "asc");
 
         PageResponse<ResourceResponse> resources = resourceService.getAllResources(type, available, pageable);
         return ResponseEntity.ok(ApiResponse.success("Resources retrieved successfully", resources));

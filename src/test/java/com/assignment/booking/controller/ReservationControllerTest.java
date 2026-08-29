@@ -81,7 +81,7 @@ class ReservationControllerTest {
                 .last(true)
                 .build();
 
-        when(reservationService.getReservations(any(), any(), any(), any(), any())).thenReturn(pageResponse);
+        when(reservationService.getReservations(any(), any(), any(), any())).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/reservations")
                         .param("page", "0")

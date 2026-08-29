@@ -89,11 +89,11 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("testuser", "password123");
 
         Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
         when(tokenProvider.generateToken(auth)).thenReturn("jwt-token");
         when(tokenProvider.getExpirationDateFromToken("jwt-token")).thenReturn(new Date(System.currentTimeMillis() + 86400000));
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         LoginResponse response = authService.login(request);
 

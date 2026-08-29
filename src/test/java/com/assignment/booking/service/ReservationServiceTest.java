@@ -8,6 +8,7 @@ import com.assignment.booking.entity.Resource;
 import com.assignment.booking.entity.User;
 import com.assignment.booking.enums.ReservationStatus;
 import com.assignment.booking.exception.BadRequestException;
+import com.assignment.booking.exception.ReservationConflictException;
 import com.assignment.booking.exception.ResourceNotFoundException;
 import com.assignment.booking.exception.UnauthorizedAccessException;
 import com.assignment.booking.mapper.EntityMapper;
@@ -273,7 +274,7 @@ class ReservationServiceTest {
         when(entityMapper.toReservationResponse(reservation)).thenReturn(reservationResponse);
 
         PageResponse<ReservationResponse> response = reservationService.getReservations(
-                null, null, null, "createdAt", pageable);
+                null, null, null, pageable);
 
         assertNotNull(response);
         assertEquals(1, response.getContent().size());
@@ -300,7 +301,7 @@ class ReservationServiceTest {
         when(entityMapper.toReservationResponse(reservation)).thenReturn(reservationResponse);
 
         PageResponse<ReservationResponse> response = reservationService.getReservations(
-                null, null, null, "createdAt", pageable);
+                null, null, null, pageable);
 
         assertNotNull(response);
         assertEquals(1, response.getContent().size());
@@ -395,5 +396,22 @@ class ReservationServiceTest {
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
 
         assertThrows(BadRequestException.class, () -> reservationService.updateReservation(1L, request));
+    }
+
+    @Test
+    void updateReservation_ConflictWithOtherReservation_ThrowsException() {
+        ReservationRequest request = ReservationRequest.builder()
+                .resourceId(1L)
+                .startTime(LocalDateTime.now().plusDays(2))
+                .endTime(LocalDateTime.now().plusDays(2).plusHours(3))
+                .price(BigDecimal.valueOf(150))
+                .build();
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
+        when(reservationRepository.existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
+                anyLong(), anyLong(), any(), any(), any())).thenReturn(true);
+
+        assertThrows(ReservationConflictException.class, () -> reservationService.updateReservation(1L, request));
     }
 }

@@ -3,6 +3,7 @@ package com.assignment.booking.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,11 +15,23 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    private static final int MIN_SECRET_KEY_BYTES = 32;
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
+
+    @PostConstruct
+    public void init() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        if (keyBytes.length < MIN_SECRET_KEY_BYTES) {
+            throw new IllegalStateException(
+                    "JWT secret must be at least " + MIN_SECRET_KEY_BYTES
+                            + " bytes (256 bits). Current length: " + keyBytes.length + " bytes.");
+        }
+    }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

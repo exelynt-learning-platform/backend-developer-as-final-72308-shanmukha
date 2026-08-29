@@ -30,18 +30,21 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        seedRoles();
-        seedUsers();
+        Role userRole = seedRoles();
+        seedUsers(userRole);
         seedResources();
     }
 
-    private void seedRoles() {
+    private Role seedRoles() {
+        Role userRole;
         if (!roleRepository.existsByName(RoleName.ROLE_USER)) {
-            roleRepository.save(Role.builder()
+            userRole = roleRepository.save(Role.builder()
                     .name(RoleName.ROLE_USER)
                     .description("Standard user role")
                     .build());
             log.info("Created ROLE_USER");
+        } else {
+            userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow();
         }
 
         if (!roleRepository.existsByName(RoleName.ROLE_ADMIN)) {
@@ -51,10 +54,11 @@ public class DataSeeder implements CommandLineRunner {
                     .build());
             log.info("Created ROLE_ADMIN");
         }
+
+        return userRole;
     }
 
-    private void seedUsers() {
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow();
+    private void seedUsers(Role userRole) {
         Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).orElseThrow();
 
         if (!userRepository.existsByUsername("user")) {

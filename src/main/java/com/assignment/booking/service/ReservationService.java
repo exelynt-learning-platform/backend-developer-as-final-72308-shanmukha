@@ -85,7 +85,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public PageResponse<ReservationResponse> getReservations(
             ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice,
-            String sort, Pageable pageable) {
+            Pageable pageable) {
 
         boolean isAdmin = isAdminUser();
         String username = getCurrentUsername();
@@ -138,6 +138,19 @@ public class ReservationService {
 
         if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Price must be greater than 0");
+        }
+
+        boolean hasConflict = reservationRepository
+                .existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
+                        resource.getId(),
+                        id,
+                        ReservationStatus.CANCELLED,
+                        request.getEndTime(),
+                        request.getStartTime()
+                );
+
+        if (hasConflict) {
+            throw new ReservationConflictException("Resource is already booked for the selected time period");
         }
 
         reservation.setResource(resource);
