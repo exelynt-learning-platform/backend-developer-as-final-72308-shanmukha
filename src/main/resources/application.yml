@@ -61,3 +61,12 @@ logging:
     root: INFO
     com.assignment.booking: DEBUG
     org.springframework.security: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+SEED_USER_PASSWORD: User@123
+SEED_ADMIN_PASSWORD: Admin@123

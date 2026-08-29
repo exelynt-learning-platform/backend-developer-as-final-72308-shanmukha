@@ -13,13 +13,11 @@ import com.assignment.booking.repository.ReservationRepository;
 import com.assignment.booking.repository.ResourceRepository;
 import com.assignment.booking.repository.UserRepository;
 import com.assignment.booking.specification.ReservationSpecification;
+import com.assignment.booking.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +34,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
-        String username = getCurrentUsername();
+        String username = SecurityUtil.getCurrentUsername();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User"));
 
@@ -65,8 +63,8 @@ public class ReservationService {
             ReservationStatus status, BigDecimal minPrice, BigDecimal maxPrice,
             Pageable pageable) {
 
-        boolean isAdmin = isAdminUser();
-        String username = getCurrentUsername();
+        boolean isAdmin = SecurityUtil.isAdminUser();
+        String username = SecurityUtil.getCurrentUsername();
 
         Specification<Reservation> spec = ReservationSpecification.withFilters(
                 status, minPrice, maxPrice, isAdmin ? null : username);
@@ -171,26 +169,8 @@ public class ReservationService {
     }
 
     private void ensureOwnershipOrAdmin(Reservation reservation) {
-        if (!isAdminUser() && !reservation.getUser().getUsername().equals(getCurrentUsername())) {
+        if (!SecurityUtil.isAdminUser() && !reservation.getUser().getUsername().equals(SecurityUtil.getCurrentUsername())) {
             throw new UnauthorizedAccessException("You can only access your own reservations");
         }
-    }
-
-    private String getCurrentUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new BadRequestException("No authenticated user found");
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        }
-        return principal.toString();
-    }
-
-    private boolean isAdminUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

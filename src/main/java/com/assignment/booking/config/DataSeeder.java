@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -30,9 +32,21 @@ public class DataSeeder implements CommandLineRunner {
     private final ResourceRepository resourceRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${SEED_USER_PASSWORD:}")
+    private String userPassword;
+
+    @Value("${SEED_ADMIN_PASSWORD:}")
+    private String adminPassword;
+
     @Override
     @Transactional
     public void run(String... args) {
+        if (userPassword == null || userPassword.isBlank() ||
+            adminPassword == null || adminPassword.isBlank()) {
+            log.warn("SEED_USER_PASSWORD and SEED_ADMIN_PASSWORD must be set — skipping seed");
+            return;
+        }
+
         Role[] roles = seedRoles();
         seedUsers(roles[0], roles[1]);
         seedResources();
@@ -63,7 +77,7 @@ public class DataSeeder implements CommandLineRunner {
 
             userRepository.save(User.builder()
                     .username("user")
-                    .password(passwordEncoder.encode("User@123"))
+                    .password(passwordEncoder.encode(userPassword))
                     .email("user@booking.com")
                     .fullName("Regular User")
                     .enabled(true)
@@ -79,7 +93,7 @@ public class DataSeeder implements CommandLineRunner {
 
             userRepository.save(User.builder()
                     .username("admin")
-                    .password(passwordEncoder.encode("Admin@123"))
+                    .password(passwordEncoder.encode(adminPassword))
                     .email("admin@booking.com")
                     .fullName("Administrator")
                     .enabled(true)
