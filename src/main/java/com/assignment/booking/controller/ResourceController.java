@@ -30,9 +30,9 @@ public class ResourceController {
             @RequestParam(required = false) Boolean available,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,asc") String[] sort) {
+            @RequestParam(defaultValue = "id,asc") String sort) {
 
-        Pageable pageable = SortUtil.parsePageable(sort, page, size, "id", "asc");
+        Pageable pageable = SortUtil.parsePageable(sort.split("\\|"), page, size, "id", "asc");
 
         PageResponse<ResourceResponse> resources = resourceService.getAllResources(type, available, pageable);
         return ResponseEntity.ok(ApiResponse.success("Resources retrieved successfully", resources));

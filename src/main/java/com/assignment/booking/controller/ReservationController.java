@@ -34,9 +34,9 @@ public class ReservationController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
 
-        Pageable pageable = SortUtil.parsePageable(sort, page, size, "createdAt", "desc");
+        Pageable pageable = SortUtil.parsePageable(sort.split("\\|"), page, size, "createdAt", "desc");
 
         PageResponse<ReservationResponse> reservations =
                 reservationService.getReservations(status, minPrice, maxPrice, pageable);
