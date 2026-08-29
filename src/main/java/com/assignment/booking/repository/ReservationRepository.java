@@ -25,10 +25,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status = :status")
     Page<Reservation> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") ReservationStatus status, Pageable pageable);
 
+    /**
+     * Detects overlapping intervals using the standard overlap formula:
+     * Existing interval (r.startTime, r.endTime) overlaps with new interval
+     * (newStart, newEnd) if and only if: r.startTime < newEnd AND r.endTime > newStart.
+     */
     boolean existsByResourceIdAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
             Long resourceId, ReservationStatus status,
             java.time.LocalDateTime endTime, java.time.LocalDateTime startTime);
 
+    /**
+     * Same overlap detection but excludes a specific reservation (for update operations).
+     */
     boolean existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
             Long resourceId, Long id, ReservationStatus status,
             java.time.LocalDateTime endTime, java.time.LocalDateTime startTime);

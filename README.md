@@ -161,21 +161,39 @@ OpenAPI JSON: http://localhost:8080/api/api-docs
 | size | int | Page size (default: 10) |
 | sort | String | Sort field and direction (default: createdAt,desc) |
 
+### 5. Seed Data Configuration (dev profile only)
+
+Seed users are only created when the `dev` profile is active. Set the seed passwords via environment variables before starting:
+
+```bash
+export SEED_USER_PASSWORD=YourStrongUserPassword
+export SEED_ADMIN_PASSWORD=YourStrongAdminPassword
+export SPRING_PROFILES_ACTIVE=dev
+mvn spring-boot:run
+```
+
+Or configure in `application-dev.yml`:
+
+```yaml
+SEED_USER_PASSWORD: YourStrongUserPassword
+SEED_ADMIN_PASSWORD: YourStrongAdminPassword
+```
+
+> **Security Warning:** Never use default or weak passwords in production. The `dev` profile must be explicitly activated.
+
 ## Seed User Credentials
 
 > **Warning:** These are development-only credentials. In production, disable data seeding and enforce strong password policies.
 
-Seed users are created automatically when running with the `dev` profile (`spring.profiles.active=dev`). Credentials are set in `DataSeeder.java` and should be changed before any non-local deployment.
-
 ### ADMIN
 
 - **Username:** `admin`
-- **Password:** Set via `DataSeeder.java` — do not use default in production
+- **Password:** Set via `SEED_ADMIN_PASSWORD` environment variable
 
 ### USER
 
 - **Username:** `user`
-- **Password:** Set via `DataSeeder.java` — do not use default in production
+- **Password:** Set via `SEED_USER_PASSWORD` environment variable
 
 ## Running the Tests
 

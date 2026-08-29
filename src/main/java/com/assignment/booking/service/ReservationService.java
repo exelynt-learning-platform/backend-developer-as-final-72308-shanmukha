@@ -145,6 +145,8 @@ public class ReservationService {
     }
 
     private void checkConflict(Long resourceId, Long excludeReservationId, ReservationRequest request) {
+        // Overlap: existing (r.start, r.end) overlaps new (req.start, req.end)
+        // iff r.start < req.end AND r.end > req.start
         boolean hasConflict;
         if (excludeReservationId == null) {
             hasConflict = reservationRepository
