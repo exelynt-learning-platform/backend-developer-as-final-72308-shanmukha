@@ -43,30 +43,8 @@ public class ReservationService {
         Resource resource = resourceRepository.findById(request.getResourceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", request.getResourceId()));
 
-        if (!resource.getAvailable()) {
-            throw new BadRequestException("Resource is not available for booking");
-        }
-
-        if (request.getStartTime().isAfter(request.getEndTime()) ||
-                request.getStartTime().isEqual(request.getEndTime())) {
-            throw new BadRequestException("Start time must be before end time");
-        }
-
-        if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Price must be greater than 0");
-        }
-
-        boolean hasConflict = reservationRepository
-                .existsByResourceIdAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
-                        resource.getId(),
-                        ReservationStatus.CANCELLED,
-                        request.getEndTime(),
-                        request.getStartTime()
-                );
-
-        if (hasConflict) {
-            throw new ReservationConflictException("Resource is already booked for the selected time period");
-        }
+        validateBookingRequest(resource, request);
+        checkConflict(resource.getId(), null, request);
 
         Reservation reservation = Reservation.builder()
                 .resource(resource)
@@ -112,9 +90,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation", id));
 
-        if (!isAdminUser() && !reservation.getUser().getUsername().equals(getCurrentUsername())) {
-            throw new UnauthorizedAccessException("You can only access your own reservations");
-        }
+        ensureOwnershipOrAdmin(reservation);
 
         return entityMapper.toReservationResponse(reservation);
     }
@@ -124,34 +100,13 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation", id));
 
-        if (!isAdminUser() && !reservation.getUser().getUsername().equals(getCurrentUsername())) {
-            throw new UnauthorizedAccessException("You can only update your own reservations");
-        }
+        ensureOwnershipOrAdmin(reservation);
 
         Resource resource = resourceRepository.findById(request.getResourceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", request.getResourceId()));
 
-        if (request.getStartTime().isAfter(request.getEndTime()) ||
-                request.getStartTime().isEqual(request.getEndTime())) {
-            throw new BadRequestException("Start time must be before end time");
-        }
-
-        if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Price must be greater than 0");
-        }
-
-        boolean hasConflict = reservationRepository
-                .existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
-                        resource.getId(),
-                        id,
-                        ReservationStatus.CANCELLED,
-                        request.getEndTime(),
-                        request.getStartTime()
-                );
-
-        if (hasConflict) {
-            throw new ReservationConflictException("Resource is already booked for the selected time period");
-        }
+        validateBookingRequest(resource, request);
+        checkConflict(resource.getId(), id, request);
 
         reservation.setResource(resource);
         reservation.setStartTime(request.getStartTime());
@@ -171,11 +126,54 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation", id));
 
-        if (!isAdminUser() && !reservation.getUser().getUsername().equals(getCurrentUsername())) {
-            throw new UnauthorizedAccessException("You can only delete your own reservations");
-        }
+        ensureOwnershipOrAdmin(reservation);
 
         reservationRepository.deleteById(id);
+    }
+
+    private void validateBookingRequest(Resource resource, ReservationRequest request) {
+        if (!resource.getAvailable()) {
+            throw new BadRequestException("Resource is not available for booking");
+        }
+
+        if (request.getStartTime().isAfter(request.getEndTime()) ||
+                request.getStartTime().isEqual(request.getEndTime())) {
+            throw new BadRequestException("Start time must be before end time");
+        }
+
+        if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Price must be greater than 0");
+        }
+    }
+
+    private void checkConflict(Long resourceId, Long excludeReservationId, ReservationRequest request) {
+        boolean hasConflict;
+        if (excludeReservationId == null) {
+            hasConflict = reservationRepository
+                    .existsByResourceIdAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
+                            resourceId,
+                            ReservationStatus.CANCELLED,
+                            request.getEndTime(),
+                            request.getStartTime());
+        } else {
+            hasConflict = reservationRepository
+                    .existsByResourceIdAndIdNotAndStatusNotAndStartTimeBeforeAndEndTimeAfter(
+                            resourceId,
+                            excludeReservationId,
+                            ReservationStatus.CANCELLED,
+                            request.getEndTime(),
+                            request.getStartTime());
+        }
+
+        if (hasConflict) {
+            throw new ReservationConflictException("Resource is already booked for the selected time period");
+        }
+    }
+
+    private void ensureOwnershipOrAdmin(Reservation reservation) {
+        if (!isAdminUser() && !reservation.getUser().getUsername().equals(getCurrentUsername())) {
+            throw new UnauthorizedAccessException("You can only access your own reservations");
+        }
     }
 
     private String getCurrentUsername() {

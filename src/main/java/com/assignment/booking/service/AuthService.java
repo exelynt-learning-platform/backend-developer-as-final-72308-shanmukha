@@ -80,9 +80,11 @@ public class AuthService {
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
 
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
         User user = User.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(encodedPassword)
                 .email(request.getEmail())
                 .fullName(request.getFullName())
                 .enabled(true)
