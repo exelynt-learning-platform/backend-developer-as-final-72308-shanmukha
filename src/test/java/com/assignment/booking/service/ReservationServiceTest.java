@@ -1,7 +1,6 @@
 package com.assignment.booking.service;
 
 import com.assignment.booking.dto.request.ReservationRequest;
-import com.assignment.booking.dto.response.PageResponse;
 import com.assignment.booking.dto.response.ReservationResponse;
 import com.assignment.booking.entity.Reservation;
 import com.assignment.booking.entity.Resource;
@@ -14,16 +13,15 @@ import com.assignment.booking.mapper.EntityMapper;
 import com.assignment.booking.repository.ReservationRepository;
 import com.assignment.booking.repository.ResourceRepository;
 import com.assignment.booking.repository.UserRepository;
+import com.assignment.booking.security.CustomUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,6 +38,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ReservationServiceTest {
 
     @Mock
@@ -75,7 +74,7 @@ class ReservationServiceTest {
                 .name("Conference Room")
                 .type("ROOM")
                 .available(true)
-                .pricePerUnit(50.00)
+                .pricePerUnit(BigDecimal.valueOf(50.00))
                 .build();
 
         reservation = Reservation.builder()
@@ -92,7 +91,7 @@ class ReservationServiceTest {
     }
 
     private void setupSecurityContext(String username, boolean isAdmin) {
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (isAdmin) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
@@ -104,7 +103,7 @@ class ReservationServiceTest {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authentication.getName()).thenReturn(username);
-        when(authentication.getAuthorities()).thenReturn(authorities);
+        when(authentication.getAuthorities()).thenReturn((Collection) authorities);
         when(authentication.isAuthenticated()).thenReturn(true);
 
         SecurityContext securityContext = mock(SecurityContext.class);

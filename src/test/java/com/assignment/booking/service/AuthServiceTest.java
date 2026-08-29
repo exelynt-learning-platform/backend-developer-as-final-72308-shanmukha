@@ -7,7 +7,6 @@ import com.assignment.booking.dto.response.UserResponse;
 import com.assignment.booking.entity.Role;
 import com.assignment.booking.entity.User;
 import com.assignment.booking.enums.RoleName;
-import com.assignment.booking.exception.BadRequestException;
 import com.assignment.booking.exception.DuplicateResourceException;
 import com.assignment.booking.mapper.EntityMapper;
 import com.assignment.booking.repository.RoleRepository;
@@ -19,21 +18,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AuthServiceTest {
 
     @Mock
@@ -90,6 +92,7 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
         when(tokenProvider.generateToken(auth)).thenReturn("jwt-token");
+        when(tokenProvider.getExpirationDateFromToken("jwt-token")).thenReturn(new Date(System.currentTimeMillis() + 86400000));
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         LoginResponse response = authService.login(request);

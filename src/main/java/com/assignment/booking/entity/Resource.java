@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,7 +33,7 @@ public class Resource {
     private Boolean available = true;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private Double pricePerUnit;
+    private BigDecimal pricePerUnit;
 
     @Column(length = 50)
     private String location;

@@ -55,7 +55,7 @@ public class ResourceService {
                 .description(request.getDescription())
                 .type(request.getType())
                 .available(request.getAvailable() != null ? request.getAvailable() : true)
-                .pricePerUnit(request.getPricePerUnit().doubleValue())
+                .pricePerUnit(request.getPricePerUnit())
                 .location(request.getLocation())
                 .capacity(request.getCapacity())
                 .build();
@@ -75,7 +75,7 @@ public class ResourceService {
         if (request.getAvailable() != null) {
             resource.setAvailable(request.getAvailable());
         }
-        resource.setPricePerUnit(request.getPricePerUnit().doubleValue());
+        resource.setPricePerUnit(request.getPricePerUnit());
         resource.setLocation(request.getLocation());
         resource.setCapacity(request.getCapacity());
 

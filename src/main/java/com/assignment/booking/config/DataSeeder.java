@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -97,7 +96,7 @@ public class DataSeeder implements CommandLineRunner {
                     .description("Large conference room with projector and whiteboard")
                     .type("ROOM")
                     .available(true)
-                    .pricePerUnit(50.00)
+                    .pricePerUnit(BigDecimal.valueOf(50.00))
                     .location("Building A, Floor 2")
                     .capacity("20 people")
                     .build());
@@ -107,7 +106,7 @@ public class DataSeeder implements CommandLineRunner {
                     .description("Small meeting room for 4-6 people")
                     .type("ROOM")
                     .available(true)
-                    .pricePerUnit(25.00)
+                    .pricePerUnit(BigDecimal.valueOf(25.00))
                     .location("Building A, Floor 1")
                     .capacity("6 people")
                     .build());
@@ -117,7 +116,7 @@ public class DataSeeder implements CommandLineRunner {
                     .description("Toyota Camry 2024 for business travel")
                     .type("VEHICLE")
                     .available(true)
-                    .pricePerUnit(75.00)
+                    .pricePerUnit(BigDecimal.valueOf(75.00))
                     .location("Parking Garage")
                     .capacity("5 passengers")
                     .build());
@@ -127,7 +126,7 @@ public class DataSeeder implements CommandLineRunner {
                     .description("HD Projector with HDMI and wireless connectivity")
                     .type("EQUIPMENT")
                     .available(true)
-                    .pricePerUnit(15.00)
+                    .pricePerUnit(BigDecimal.valueOf(15.00))
                     .location("Equipment Room")
                     .capacity("N/A")
                     .build());
@@ -137,7 +136,7 @@ public class DataSeeder implements CommandLineRunner {
                     .description("Large training room with multiple workstations")
                     .type("ROOM")
                     .available(true)
-                    .pricePerUnit(100.00)
+                    .pricePerUnit(BigDecimal.valueOf(100.00))
                     .location("Building B, Floor 3")
                     .capacity("30 people")
                     .build());
