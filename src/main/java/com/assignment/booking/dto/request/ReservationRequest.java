@@ -1,6 +1,7 @@
 package com.assignment.booking.dto.request;
 
 import com.assignment.booking.enums.ReservationStatus;
+import com.assignment.booking.validation.StartBeforeEnd;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@StartBeforeEnd
 public class ReservationRequest {
 
     @NotNull(message = "Resource ID is required")
@@ -24,6 +26,7 @@ public class ReservationRequest {
     private LocalDateTime startTime;
 
     @NotNull(message = "End time is required")
+    @Future(message = "End time must be in the future")
     private LocalDateTime endTime;
 
     @NotNull(message = "Price is required")

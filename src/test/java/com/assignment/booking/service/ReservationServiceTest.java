@@ -1,6 +1,7 @@
 package com.assignment.booking.service;
 
 import com.assignment.booking.dto.request.ReservationRequest;
+import com.assignment.booking.dto.response.PageResponse;
 import com.assignment.booking.dto.response.ReservationResponse;
 import com.assignment.booking.entity.Reservation;
 import com.assignment.booking.entity.Resource;
@@ -28,6 +29,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -246,5 +252,148 @@ class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
         assertThrows(UnauthorizedAccessException.class, () -> reservationService.deleteReservation(1L));
+    }
+
+    @Test
+    void getReservations_UserOwnOnly_Success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        ReservationResponse reservationResponse = ReservationResponse.builder()
+                .id(1L)
+                .resourceId(1L)
+                .resourceName("Conference Room")
+                .userId(1L)
+                .username("testuser")
+                .price(BigDecimal.valueOf(100))
+                .status("PENDING")
+                .build();
+
+        Page<Reservation> page = new PageImpl<>(List.of(reservation), pageable, 1);
+
+        when(reservationRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(entityMapper.toReservationResponse(reservation)).thenReturn(reservationResponse);
+
+        PageResponse<ReservationResponse> response = reservationService.getReservations(
+                null, null, null, "createdAt", pageable);
+
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+        assertEquals(1L, response.getContent().get(0).getId());
+    }
+
+    @Test
+    void getReservations_AdminCanSeeAll_Success() {
+        setupSecurityContext("admin", true);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        ReservationResponse reservationResponse = ReservationResponse.builder()
+                .id(1L)
+                .resourceId(1L)
+                .userId(1L)
+                .username("otheruser")
+                .price(BigDecimal.valueOf(100))
+                .status("PENDING")
+                .build();
+
+        Page<Reservation> page = new PageImpl<>(List.of(reservation), pageable, 1);
+
+        when(reservationRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(entityMapper.toReservationResponse(reservation)).thenReturn(reservationResponse);
+
+        PageResponse<ReservationResponse> response = reservationService.getReservations(
+                null, null, null, "createdAt", pageable);
+
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void updateReservation_Success() {
+        ReservationRequest request = ReservationRequest.builder()
+                .resourceId(1L)
+                .startTime(LocalDateTime.now().plusDays(2))
+                .endTime(LocalDateTime.now().plusDays(2).plusHours(3))
+                .price(BigDecimal.valueOf(150))
+                .status(ReservationStatus.CONFIRMED)
+                .build();
+
+        Reservation updatedReservation = Reservation.builder()
+                .id(1L)
+                .resource(resource)
+                .user(user)
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .price(request.getPrice())
+                .status(ReservationStatus.CONFIRMED)
+                .build();
+
+        ReservationResponse updatedResponse = ReservationResponse.builder()
+                .id(1L)
+                .resourceId(1L)
+                .userId(1L)
+                .username("testuser")
+                .price(BigDecimal.valueOf(150))
+                .status("CONFIRMED")
+                .build();
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(updatedReservation);
+        when(entityMapper.toReservationResponse(updatedReservation)).thenReturn(updatedResponse);
+
+        ReservationResponse response = reservationService.updateReservation(1L, request);
+
+        assertNotNull(response);
+        assertEquals("CONFIRMED", response.getStatus());
+        verify(reservationRepository).save(any(Reservation.class));
+    }
+
+    @Test
+    void updateReservation_UserNotOwner_ThrowsException() {
+        User otherUser = User.builder()
+                .id(2L)
+                .username("otheruser")
+                .build();
+        reservation.setUser(otherUser);
+
+        ReservationRequest request = ReservationRequest.builder()
+                .resourceId(1L)
+                .startTime(LocalDateTime.now().plusDays(2))
+                .endTime(LocalDateTime.now().plusDays(2).plusHours(3))
+                .price(BigDecimal.valueOf(150))
+                .build();
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        assertThrows(UnauthorizedAccessException.class, () -> reservationService.updateReservation(1L, request));
+    }
+
+    @Test
+    void updateReservation_InvalidTimeRange_ThrowsException() {
+        ReservationRequest request = ReservationRequest.builder()
+                .resourceId(1L)
+                .startTime(LocalDateTime.now().plusDays(2).plusHours(3))
+                .endTime(LocalDateTime.now().plusDays(2))
+                .price(BigDecimal.valueOf(150))
+                .build();
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
+
+        assertThrows(BadRequestException.class, () -> reservationService.updateReservation(1L, request));
+    }
+
+    @Test
+    void updateReservation_NegativePrice_ThrowsException() {
+        ReservationRequest request = ReservationRequest.builder()
+                .resourceId(1L)
+                .startTime(LocalDateTime.now().plusDays(2))
+                .endTime(LocalDateTime.now().plusDays(2).plusHours(3))
+                .price(BigDecimal.valueOf(-10))
+                .build();
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
+
+        assertThrows(BadRequestException.class, () -> reservationService.updateReservation(1L, request));
     }
 }
