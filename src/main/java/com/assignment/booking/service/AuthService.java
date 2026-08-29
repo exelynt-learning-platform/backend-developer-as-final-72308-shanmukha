@@ -47,7 +47,8 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
 
-        User user = (User) authentication.getPrincipal();
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         return LoginResponse.builder()
                 .token(token)
