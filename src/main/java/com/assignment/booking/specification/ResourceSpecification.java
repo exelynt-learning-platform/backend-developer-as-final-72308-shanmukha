@@ -3,13 +3,14 @@ package com.assignment.booking.specification;
 import com.assignment.booking.entity.Resource;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class ResourceSpecification {
+
+    private ResourceSpecification() {
+    }
 
     public static Specification<Resource> withFilters(String type, Boolean available) {
         return (root, query, criteriaBuilder) -> {

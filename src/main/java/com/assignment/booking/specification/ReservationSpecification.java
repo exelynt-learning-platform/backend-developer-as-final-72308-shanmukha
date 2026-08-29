@@ -4,14 +4,18 @@ import com.assignment.booking.entity.Reservation;
 import com.assignment.booking.enums.ReservationStatus;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
-@Component
 public class ReservationSpecification {
+
+    private static final Pattern SAFE_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]+$");
+
+    private ReservationSpecification() {
+    }
 
     public static Specification<Reservation> withFilters(
             ReservationStatus status,

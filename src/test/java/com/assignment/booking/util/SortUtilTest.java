@@ -11,14 +11,14 @@ class SortUtilTest {
 
     @Test
     void parseSort_TwoElements_ReturnsCorrectSort() {
-        Sort sort = SortUtil.parseSort(new String[]{"price", "asc"}, "id", "asc");
+        Sort sort = SortUtil.parseSort(new String[]{"price,asc"}, "id", "asc");
         assertNotNull(sort);
         assertEquals(1, sort.stream().count());
     }
 
     @Test
     void parseSort_TwoElementsDesc_ReturnsCorrectSort() {
-        Sort sort = SortUtil.parseSort(new String[]{"createdAt", "desc"}, "id", "asc");
+        Sort sort = SortUtil.parseSort(new String[]{"createdAt,desc"}, "id", "asc");
         assertNotNull(sort);
         assertEquals(1, sort.stream().count());
     }
@@ -47,12 +47,31 @@ class SortUtilTest {
     @Test
     void parseSort_InvalidDirection_ThrowsException() {
         assertThrows(BadRequestException.class,
-                () -> SortUtil.parseSort(new String[]{"price", "invalid"}, "id", "asc"));
+                () -> SortUtil.parseSort(new String[]{"price,invalid"}, "id", "asc"));
+    }
+
+    @Test
+    void parseSort_MultipleSortFields_ReturnsMultipleOrders() {
+        Sort sort = SortUtil.parseSort(new String[]{"price,asc", "createdAt,desc"}, "id", "asc");
+        assertNotNull(sort);
+        assertEquals(2, sort.stream().count());
+    }
+
+    @Test
+    void parseSort_InvalidFormat_ThrowsException() {
+        assertThrows(BadRequestException.class,
+                () -> SortUtil.parseSort(new String[]{"price,asc,extra"}, "id", "asc"));
+    }
+
+    @Test
+    void parseSort_BlankField_ThrowsException() {
+        assertThrows(BadRequestException.class,
+                () -> SortUtil.parseSort(new String[]{",asc"}, "id", "asc"));
     }
 
     @Test
     void parsePageable_ValidSort_ReturnsPageable() {
-        Pageable pageable = SortUtil.parsePageable(new String[]{"price", "asc"}, 0, 10, "id", "asc");
+        Pageable pageable = SortUtil.parsePageable(new String[]{"price,asc"}, 0, 10, "id", "asc");
         assertNotNull(pageable);
         assertEquals(0, pageable.getPageNumber());
         assertEquals(10, pageable.getPageSize());
