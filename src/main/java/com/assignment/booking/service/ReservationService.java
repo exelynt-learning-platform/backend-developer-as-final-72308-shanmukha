@@ -128,10 +128,18 @@ public class ReservationService {
     }
 
     private void validateBookingRequest(Resource resource, ReservationRequest request) {
+        validateResourceAvailability(resource);
+        validateTimeRange(request);
+        validatePrice(resource, request);
+    }
+
+    private void validateResourceAvailability(Resource resource) {
         if (!resource.getAvailable()) {
             throw new BadRequestException("Resource is not available for booking");
         }
+    }
 
+    private void validateTimeRange(ReservationRequest request) {
         if (request.getStartTime().isBefore(java.time.LocalDateTime.now())) {
             throw new BadRequestException("Start time must be in the future");
         }
@@ -144,7 +152,9 @@ public class ReservationService {
                 request.getStartTime().isEqual(request.getEndTime())) {
             throw new BadRequestException("Start time must be before end time");
         }
+    }
 
+    private void validatePrice(Resource resource, ReservationRequest request) {
         if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Price must be greater than 0");
         }

@@ -122,10 +122,10 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    void protectedEndpoint_Returns403_WithInvalidToken() throws Exception {
+    void protectedEndpoint_Returns401_WithInvalidToken() throws Exception {
         mockMvc.perform(get("/api/reservations")
                         .header("Authorization", "Bearer invalid-token"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
