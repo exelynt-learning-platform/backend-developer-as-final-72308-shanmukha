@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {
         log.debug("Resource not found: {}", ex.getMessage());
-        ErrorResponse error = buildError(HttpStatus.NOT_FOUND, "Not Found", "The requested resource was not found", request.getRequestURI());
+        ErrorResponse error = buildError(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
             DuplicateResourceException ex, HttpServletRequest request) {
         log.debug("Duplicate resource: {}", ex.getMessage());
-        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Conflict", "The resource already exists", request.getRequestURI());
+        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 

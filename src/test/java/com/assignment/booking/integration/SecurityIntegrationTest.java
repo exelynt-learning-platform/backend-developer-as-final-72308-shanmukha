@@ -109,10 +109,10 @@ class SecurityIntegrationTest {
     @Test
     void resourceEndpoints_RequireAuth() throws Exception {
         mockMvc.perform(get("/api/resources"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/api/resources/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -123,16 +123,16 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    void protectedEndpoint_Returns403_WithoutToken() throws Exception {
+    void protectedEndpoint_Returns401_WithoutToken() throws Exception {
         mockMvc.perform(get("/api/reservations"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void protectedEndpoint_Returns403_WithInvalidToken() throws Exception {
+    void protectedEndpoint_Returns401_WithInvalidToken() throws Exception {
         mockMvc.perform(get("/api/reservations")
                         .header("Authorization", "Bearer invalid-token"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

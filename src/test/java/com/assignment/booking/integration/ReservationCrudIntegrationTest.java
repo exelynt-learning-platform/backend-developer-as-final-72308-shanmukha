@@ -168,13 +168,13 @@ class ReservationCrudIntegrationTest {
     }
 
     @Test
-    void createReservation_Unauthenticated_Returns403() throws Exception {
+    void createReservation_Unauthenticated_Returns401() throws Exception {
         ReservationRequest request = createReservationRequest(resourceId, BigDecimal.valueOf(100));
 
         mockMvc.perform(post("/api/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

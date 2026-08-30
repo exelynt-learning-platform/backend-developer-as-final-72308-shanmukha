@@ -23,6 +23,8 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
 
+    private SecretKey signingKey;
+
     @PostConstruct
     public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
@@ -33,11 +35,11 @@ public class JwtTokenProvider {
                             + "Current decoded length: " + keyBytes.length + " bytes. "
                             + "Generate one with: openssl rand -base64 32");
         }
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return signingKey;
     }
 
     public String generateToken(Authentication authentication) {
