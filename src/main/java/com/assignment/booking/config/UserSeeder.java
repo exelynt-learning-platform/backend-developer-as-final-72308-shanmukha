@@ -32,8 +32,9 @@ public class UserSeeder {
         if (userPassword == null || userPassword.isBlank() ||
             adminPassword == null || adminPassword.isBlank()) {
             throw new IllegalStateException(
-                    "SEED_USER_PASSWORD and SEED_ADMIN_PASSWORD environment variables must be set when using the dev profile. "
-                    + "Generate secure values with: openssl rand -base64 32");
+                    "SEED_USER_PASSWORD and SEED_ADMIN_PASSWORD environment variables must be set "
+                    + "when using the dev profile. Generate secure values with: "
+                    + "SEED_USER_PASSWORD=$(openssl rand -base64 32) SEED_ADMIN_PASSWORD=$(openssl rand -base64 32)");
         }
 
         seedUser(userRole);
