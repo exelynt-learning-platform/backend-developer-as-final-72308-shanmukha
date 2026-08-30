@@ -159,12 +159,22 @@ public class ReservationService {
             throw new BadRequestException("Price must be greater than 0");
         }
 
-        long hours = java.time.Duration.between(request.getStartTime(), request.getEndTime()).toHours();
-        BigDecimal minimumPrice = resource.getPricePerUnit().multiply(BigDecimal.valueOf(Math.max(hours, 1)));
+        long units = calculateBookingUnits(request);
+        BigDecimal minimumPrice = calculateMinimumPrice(resource, units);
         if (request.getPrice().compareTo(minimumPrice) < 0) {
             throw new BadRequestException("Price must be at least " + minimumPrice
-                    + " (" + resource.getPricePerUnit() + "/unit x " + Math.max(hours, 1) + " units)");
+                    + " (" + resource.getPricePerUnit() + "/unit x " + units + " units)");
         }
+    }
+
+    private long calculateBookingUnits(ReservationRequest request) {
+        return Math.max(
+                java.time.Duration.between(request.getStartTime(), request.getEndTime()).toHours(),
+                1);
+    }
+
+    private BigDecimal calculateMinimumPrice(Resource resource, long units) {
+        return resource.getPricePerUnit().multiply(BigDecimal.valueOf(units));
     }
 
     private void checkConflict(Long resourceId, Long excludeReservationId, ReservationRequest request) {

@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    private ErrorResponse buildError(HttpStatus status, String error, String message, String path) {
+    private static ErrorResponse buildError(HttpStatus status, String error, String message, String path) {
         return ErrorResponse.builder()
                 .status(status.value())
                 .error(error)

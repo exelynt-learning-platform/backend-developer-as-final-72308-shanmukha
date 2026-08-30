@@ -171,6 +171,7 @@ class ResourceCrudIntegrationTest {
                         .content(objectMapper.writeValueAsString(req2)));
 
         mockMvc.perform(get("/api/resources")
+                        .header("Authorization", bearer(userToken))
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -189,14 +190,16 @@ class ResourceCrudIntegrationTest {
 
         Long id = objectMapper.readTree(createResponse).path("data").path("id").asLong();
 
-        mockMvc.perform(get("/api/resources/" + id))
+        mockMvc.perform(get("/api/resources/" + id)
+                        .header("Authorization", bearer(userToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Findable Room"));
     }
 
     @Test
     void getResourceById_NotFound_Returns404() throws Exception {
-        mockMvc.perform(get("/api/resources/9999"))
+        mockMvc.perform(get("/api/resources/9999")
+                        .header("Authorization", bearer(userToken)))
                 .andExpect(status().isNotFound());
     }
 
@@ -237,7 +240,8 @@ class ResourceCrudIntegrationTest {
                         .header("Authorization", bearer(adminToken)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/resources/" + id))
+        mockMvc.perform(get("/api/resources/" + id)
+                        .header("Authorization", bearer(adminToken)))
                 .andExpect(status().isNotFound());
     }
 

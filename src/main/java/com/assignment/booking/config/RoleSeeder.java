@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -16,10 +18,10 @@ public class RoleSeeder {
     private final RoleRepository roleRepository;
 
     @Transactional
-    public Role[] seed() {
+    public Map<RoleName, Role> seed() {
         Role userRole = seedRole(RoleName.ROLE_USER, "Standard user role");
         Role adminRole = seedRole(RoleName.ROLE_ADMIN, "Administrator role");
-        return new Role[]{userRole, adminRole};
+        return Map.of(RoleName.ROLE_USER, userRole, RoleName.ROLE_ADMIN, adminRole);
     }
 
     private Role seedRole(RoleName roleName, String description) {
