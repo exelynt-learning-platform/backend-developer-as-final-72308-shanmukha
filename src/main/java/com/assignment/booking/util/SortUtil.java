@@ -5,8 +5,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class SortUtil {
 
@@ -24,34 +26,35 @@ public final class SortUtil {
             return Sort.by(parseDirection(defaultDirection), defaultField);
         }
 
-        List<Sort.Order> orders = new ArrayList<>();
-        for (String sortParam : sort) {
-            if (sortParam == null || sortParam.isBlank()) {
-                continue;
-            }
-            String[] parts = sortParam.split(",");
-            if (parts.length < 1 || parts.length > 2) {
-                throw new BadRequestException(
-                        "Invalid sort format: '" + sortParam + "'. Expected 'field' or 'field,asc|desc'.");
-            }
+        List<Sort.Order> orders = Arrays.stream(sort)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(SortUtil::parseSortOrder)
+                .toList();
 
-            String field = parts[0].trim();
-            if (field.isBlank()) {
-                throw new BadRequestException("Sort field cannot be blank.");
-            }
+        return orders.isEmpty()
+                ? Sort.by(parseDirection(defaultDirection), defaultField)
+                : Sort.by(orders);
+    }
 
-            Sort.Direction direction = parts.length == 2
-                    ? parseDirection(parts[1].trim())
-                    : parseDirection(defaultDirection);
-
-            orders.add(new Sort.Order(direction, field));
+    private static Sort.Order parseSortOrder(String sortParam) {
+        String[] parts = sortParam.split(",");
+        if (parts.length < 1 || parts.length > 2) {
+            throw new BadRequestException(
+                    "Invalid sort format: '" + sortParam + "'. Expected 'field' or 'field,asc|desc'.");
         }
 
-        if (orders.isEmpty()) {
-            return Sort.by(parseDirection(defaultDirection), defaultField);
+        String field = parts[0].trim();
+        if (field.isEmpty()) {
+            throw new BadRequestException("Sort field cannot be blank.");
         }
 
-        return Sort.by(orders);
+        Sort.Direction direction = parts.length == 2
+                ? parseDirection(parts[1].trim())
+                : parseDirection("asc");
+
+        return new Sort.Order(direction, field);
     }
 
     private static Sort.Direction parseDirection(String direction) {
