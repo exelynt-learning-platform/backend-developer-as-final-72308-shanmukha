@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Resources", description = "Resource management endpoints")
 public class ResourceController {
 
+    private static final String DEFAULT_SORT = "name,asc";
+
     private final ResourceService resourceService;
 
     @GetMapping
@@ -30,7 +32,7 @@ public class ResourceController {
             @RequestParam(required = false) Boolean available,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "name,asc") String sort) {
+            @RequestParam(defaultValue = DEFAULT_SORT) String sort) {
 
         Pageable pageable = SortUtil.parsePageable(sort.split("\\|"), page, size, "name", "asc");
 
