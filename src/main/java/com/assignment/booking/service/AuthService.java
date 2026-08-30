@@ -49,7 +49,9 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
 
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        if (!(authentication.getPrincipal() instanceof UserPrincipal principal)) {
+            throw new BadRequestException("Authentication failed: unexpected principal type");
+        }
 
         return LoginResponse.builder()
                 .token(token)

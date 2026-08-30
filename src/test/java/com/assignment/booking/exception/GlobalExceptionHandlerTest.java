@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(404, response.getBody().getStatus());
-        assertEquals("Resource not found with id: 1", response.getBody().getMessage());
+        assertEquals("The requested resource was not found", response.getBody().getMessage());
     }
 
     @Test
@@ -53,7 +53,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleResourceNotFound(ex, request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("User", response.getBody().getMessage());
+        assertEquals("The requested resource was not found", response.getBody().getMessage());
     }
 
     @Test
@@ -90,7 +90,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleReservationConflict(ex, request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Time slot taken", response.getBody().getMessage());
+        assertEquals("The resource is already booked for the selected time period", response.getBody().getMessage());
     }
 
     @Test

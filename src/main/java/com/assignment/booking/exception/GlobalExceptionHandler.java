@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse error = buildError(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request.getRequestURI());
+        log.debug("Resource not found: {}", ex.getMessage());
+        ErrorResponse error = buildError(HttpStatus.NOT_FOUND, "Not Found", "The requested resource was not found", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -48,7 +49,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
             DuplicateResourceException ex, HttpServletRequest request) {
-        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request.getRequestURI());
+        log.debug("Duplicate resource: {}", ex.getMessage());
+        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Conflict", "The resource already exists", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
@@ -62,7 +64,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ReservationConflictException.class)
     public ResponseEntity<ErrorResponse> handleReservationConflict(
             ReservationConflictException ex, HttpServletRequest request) {
-        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Reservation Conflict", ex.getMessage(), request.getRequestURI());
+        log.debug("Reservation conflict: {}", ex.getMessage());
+        ErrorResponse error = buildError(HttpStatus.CONFLICT, "Reservation Conflict", "The resource is already booked for the selected time period", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 

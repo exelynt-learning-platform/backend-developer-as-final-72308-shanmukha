@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -140,11 +142,19 @@ public class ReservationService {
     }
 
     private void validateTimeRange(ReservationRequest request) {
-        if (request.getStartTime().isBefore(java.time.LocalDateTime.now())) {
+        if (request.getStartTime() == null) {
+            throw new BadRequestException("Start time is required");
+        }
+        if (request.getEndTime() == null) {
+            throw new BadRequestException("End time is required");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (request.getStartTime().isBefore(now)) {
             throw new BadRequestException("Start time must be in the future");
         }
 
-        if (request.getEndTime().isBefore(java.time.LocalDateTime.now())) {
+        if (request.getEndTime().isBefore(now)) {
             throw new BadRequestException("End time must be in the future");
         }
 
@@ -169,7 +179,7 @@ public class ReservationService {
 
     private long calculateBookingUnits(ReservationRequest request) {
         return Math.max(
-                java.time.Duration.between(request.getStartTime(), request.getEndTime()).toHours(),
+                Duration.between(request.getStartTime(), request.getEndTime()).toHours(),
                 1);
     }
 
