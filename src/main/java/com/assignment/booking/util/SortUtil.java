@@ -56,7 +56,7 @@ public final class SortUtil {
 
     private static Sort.Direction parseDirection(String direction) {
         try {
-            return Sort.Direction.fromString(direction);
+            return Sort.Direction.fromString(direction.trim().toLowerCase());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(
                     "Invalid sort direction: '" + direction + "'. Must be 'asc' or 'desc'.");

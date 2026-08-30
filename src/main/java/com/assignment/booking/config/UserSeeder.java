@@ -31,8 +31,9 @@ public class UserSeeder {
     public void seed(Role userRole, Role adminRole) {
         if (userPassword == null || userPassword.isBlank() ||
             adminPassword == null || adminPassword.isBlank()) {
-            log.warn("SEED_USER_PASSWORD and SEED_ADMIN_PASSWORD must be set — skipping user seed");
-            return;
+            throw new IllegalStateException(
+                    "SEED_USER_PASSWORD and SEED_ADMIN_PASSWORD environment variables must be set when using the dev profile. "
+                    + "Generate secure values with: openssl rand -base64 32");
         }
 
         seedUser(userRole);

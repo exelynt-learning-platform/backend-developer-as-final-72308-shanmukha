@@ -17,7 +17,8 @@ public class ResourceSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             if (type != null && !type.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("type"), type));
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("type")), type.toLowerCase()));
             }
 
             if (available != null) {
